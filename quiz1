@@ -1,129 +1,110 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-// Abstract class representing a general Employee
-public abstract class Employee
+public class Employee
 {
-    // Properties of the Employee class
-    public string Name { get; set; }       // Name of the employee
-    public int EmployeeID { get; set; }     // Unique identifier for the employee
-    public decimal Salary { get; set; }     // Salary of the employee
+    public string Name { get; set; }
+    public int EmployeeID { get; set; }
+    public decimal Salary { get; set; }
 
-    // Constructor to initialize the Employee properties
-    public Employee(string name, int employeeID, decimal salary)
+    // Constructor for Employee class
+    public Employee(string name, int employeeId, decimal salary)
     {
-        Name = name;                       // Set the employee's name
-        EmployeeID = employeeID;           // Set the employee's ID
-        Salary = salary;                   // Set the employee's salary
+        Name = name;
+        EmployeeID = employeeId;
+        Salary = salary;
     }
 }
 
-// Class representing a regular employee, inheriting from Employee
 public class RegularEmployee : Employee
 {
-    // Constructor to initialize the RegularEmployee properties
-    public RegularEmployee(string name, int employeeID, decimal salary)
-        : base(name, employeeID, salary) // Call the base class constructor
-    { }
+    public RegularEmployee(string name, int employeeId, decimal salary) 
+        : base(name, employeeId, salary)  // Calling the base constructor
+    {
+        // No additional properties needed
+    }
 }
 
-// Class representing a manager, inheriting from Employee
 public class Manager : Employee
 {
-    public double BonusRate { get; set; } // Bonus rate for the manager
+    public double BonusRate { get; set; }
 
-    // Constructor to initialize the Manager properties
-    public Manager(string name, int employeeID, decimal salary, double bonusRate)
-        : base(name, employeeID, salary) // Call the base class constructor
+    public Manager(string name, int employeeId, decimal salary, double bonusRate) 
+        : base(name, employeeId, salary) // Calling the base constructor
     {
-        BonusRate = bonusRate;            // Set the manager's bonus rate
+        BonusRate = bonusRate;
     }
 }
 
-// Class representing a product
 public class Product
 {
-    // Properties of the Product class
-    public string Name { get; set; }      // Name of the product
-    public int ProductID { get; set; }     // Unique identifier for the product
-    public decimal Price { get; set; }     // Price of the product
+    public string Name { get; set; }
+    public int ProductID { get; set; }
+    public decimal Price { get; set; }
 
-    // Constructor to initialize the Product properties
-    public Product(string name, int productID, decimal price)
+    public Product(string name, int productId, decimal price)
     {
-        Name = name;                      // Set the product's name
-        ProductID = productID;            // Set the product's ID
-        Price = price;                    // Set the product's price
+        Name = name;
+        ProductID = productId;
+        Price = price;
     }
 }
 
-// Class representing an order
 public class Order
 {
-    // Properties of the Order class
-    public int OrderID { get; set; }             // Unique identifier for the order
-    public List<Product> Products { get; set; }   // List of products included in the order
-    public Employee Employee { get; set; }        // Employee who processed the order
+    public int OrderID { get; set; }
+    public List<Product> PurchasedProducts { get; set; }
+    public Employee ProcessedBy { get; set; }
 
-    // Property to calculate the total price of products in the order
+    public Order(int orderId, Employee processedBy)
+    {
+        OrderID = orderId;
+        ProcessedBy = processedBy;
+        PurchasedProducts = new List<Product>();
+    }
+
     public decimal TotalPrice
     {
         get
         {
-            decimal totalPrice = 0; // Initialize total price to zero
-
-            // Loop through each product in the order and sum their prices
-            foreach (var product in Products)
+            decimal total = 0;
+            foreach (var product in PurchasedProducts)
             {
-                totalPrice += product.Price; // Add the product's price to total
+                total += product.Price;
             }
-            return totalPrice; // Return the total price
+            return total;
         }
-    }
-
-    // Constructor to initialize the Order properties
-    public Order(int orderID, Employee employee)
-    {
-        OrderID = orderID;          // Set the order's ID
-        Employee = employee;        // Set the employee who processed the order
-        Products = new List<Product>(); // Initialize the list of products
-    }
-
-    // Method to add a product to the order
-    public void AddProduct(Product product)
-    {
-        Products.Add(product); // Add the specified product to the list
     }
 }
 
-// Main program class
 class Program
 {
-    // Main entry point of the program
     static void Main(string[] args)
     {
-        // Creating instances of employees
-        Employee regularEmployee = new RegularEmployee("soxumski vano", 1, 50000m); // Regular employee
-        Employee manager = new Manager("soxumski maxo", 2, 60000m, 0.1); // Manager with a bonus rate
+        // Create instances of RegularEmployee and Manager
+        RegularEmployee regularEmployee = new RegularEmployee("Alice Johnson", 201, 60000m);
+        Manager manager = new Manager("Bob Smith", 202, 90000m, 0.10);
 
-        // Creating instances of products
-        Product product1 = new Product("macbook", 1, 100m); // Product 1: macbook
-        Product product2 = new Product("ipad", 2, 200m); // Product 2: ipad
+        // Create instances of Product
+        Product product1 = new Product("Smartphone", 101, 699.99m);
+        Product product2 = new Product("Laptop", 102, 1299.99m);
+        Product product3 = new Product("Headphones", 103, 199.99m);
 
-        // Creating an order and associating it with the manager
-        Order order = new Order(1, manager); // Order ID 1 processed by manager
-        order.AddProduct(product1); // Add macbook to the order
-        order.AddProduct(product2); // Add ipad to the order
+        // Create an Order
+        Order order = new Order(301, regularEmployee);
+        order.PurchasedProducts.Add(product1);
+        order.PurchasedProducts.Add(product2);
+        order.PurchasedProducts.Add(product3);
 
-        // Outputting order details
-        Console.WriteLine("Order ID: " + order.OrderID); // Display order ID
-        Console.WriteLine("Products:"); // Indicate products list will follow
-        // Loop through the products and display their names
-        foreach (var product in order.Products)
+        // Display order details
+        Console.WriteLine($"Order ID: {order.OrderID}");
+        Console.WriteLine($"Processed By: {order.ProcessedBy.Name}");
+        Console.WriteLine("Products Purchased:");
+        foreach (var product in order.PurchasedProducts)
         {
-            Console.WriteLine(product.Name); // Display product name
+            Console.WriteLine($"- {product.Name} (ID: {product.ProductID}, Price: {product.Price:C})");
         }
-        Console.WriteLine("Total Price: " + order.TotalPrice); // Display total price of the order
-        Console.WriteLine("Processed by: " + order.Employee.Name); // Display the name of the employee who processed the order
+        Console.WriteLine($"Total Price: {order.TotalPrice:C}");
     }
 }
+
