@@ -1,0 +1,128 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+namespace quiz2;
+
+
+public interface IRepository<T> where T : class
+{
+    T GetById(int id);
+    IEnumerable<T> GetAll();
+    void Add(T entity);
+    void Update(T entity);
+    void Delete(int id);
+}
+
+public interface IEntity
+{
+    public int Id { get; set; }
+}
+
+public class BaseRepository<T> : IRepository<T> where T : class, IEntity
+{
+    protected List<T> _entities = new List<T>();  // In-memory data store
+
+    // Get an entity by its ID
+    public T GetById(int id)
+    {
+        return _entities.FirstOrDefault(e => e.Id == id);
+    }
+
+    // Get all entities
+    public IEnumerable<T> GetAll()
+    {
+        return _entities;
+    }
+
+    // Add a new entity to the list
+    public void Add(T entity)
+    {
+        _entities.Add(entity);
+    }
+
+    // Update an existing entity
+    public void Update(T entity)
+    {
+        var existingEntity = GetById(entity.Id);
+        if (existingEntity != null)
+        {
+            _entities.Remove(existingEntity);
+            _entities.Add(entity);  // Replace the entity with the updated one
+        }
+    }
+
+    // Delete an entity by its ID
+    public void Delete(int id)
+    {
+        var entity = GetById(id);
+        if (entity != null)
+        {
+            _entities.Remove(entity);
+        }
+    }
+}
+
+
+public class Customer : IEntity
+{
+    public int Id { get; set; }  // From IEntity
+    public string Name { get; set; }
+    public string Email { get; set; }
+}
+
+public class CustomerRepository : BaseRepository<Customer>
+{
+
+    public Customer GetByEmail(string email)
+    {
+        foreach (var customer in _entities)
+        {
+            if (customer.Email == email)
+            {
+                return customer;  // Return the first match
+            }
+        }
+        return null;  // If no match is found
+    }
+}
+class Program
+{
+    static void Main(string[] args)
+    {
+        // Create an instance of CustomerRepository
+        var customerRepository = new CustomerRepository();
+
+        // Create a new customer
+        var newCustomer = new Customer { Id = 1, Name = "John Doe", Email = "john@example.com" };
+        customerRepository.Add(newCustomer);
+        Console.WriteLine("Customer added.");
+
+        // Read all customers
+        var customers = customerRepository.GetAll();
+        Console.WriteLine("Customers:");
+        foreach (var customer in customers)
+        {
+            Console.WriteLine($"Id: {customer.Id}, Name: {customer.Name}, Email: {customer.Email}");
+        }
+
+        // Update a customer
+        newCustomer.Name = "John Smith";
+        customerRepository.Update(newCustomer);
+        Console.WriteLine("Customer updated.");
+
+        // Read the updated customer
+        var updatedCustomer = customerRepository.GetById(1);
+        Console.WriteLine($"Updated Customer: Id: {updatedCustomer.Id}, Name: {updatedCustomer.Name}, Email: {updatedCustomer.Email}");
+
+        // Delete a customer
+        customerRepository.Delete(1);
+        Console.WriteLine("Customer deleted.");
+
+        // Try to read deleted customer
+        var deletedCustomer = customerRepository.GetById(1);
+        if (deletedCustomer == null)
+        {
+            Console.WriteLine("Customer not found.");
+        }
+    }
+}
